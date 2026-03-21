@@ -14,20 +14,17 @@ jobs:
           pip install kaggle
           python - <<EOF
           import requests
-          import base64
+          import json
 
           username = "${{ secrets.KAGGLE_USERNAME }}"
           key = "${{ secrets.KAGGLE_KEY }}"
 
-          token = base64.b64encode(f"{username}:{key}".encode()).decode()
-
           response = requests.post(
               f"https://www.kaggle.com/api/v1/kernels/{username}/leads-hunter/run",
-              headers={
-                  "Authorization": f"Basic {token}",
-                  "Content-Type": "application/json"
-              }
+              auth=(username, key),
+              headers={"Content-Type": "application/json"},
+              json={}
           )
           print(f"Status: {response.status_code}")
-          print(f"Response: {response.text}")
+          print(f"Response: {response.text[:500]}")
           EOF
