@@ -4,10 +4,18 @@ import requests
 import re
 import random
 
-# --- CONFIGURATION (From Secrets) ---
-B2B_URL = os.getenv("B2B_SCRIPT_URL")
-B2C_URL = os.getenv("B2C_SCRIPT_URL")
-SENDER_EMAIL = os.getenv("SENDER_EMAIL") or "lookscorner080@gmail.com"
+from kaggle_secrets import UserSecretsClient
+secrets = UserSecretsClient()
+
+try:
+    B2B_URL = secrets.get_secret("B2B_SCRIPT_URL")
+    B2C_URL = secrets.get_secret("B2C_SCRIPT_URL")
+    SENDER_EMAIL = secrets.get_secret("SENDER_EMAIL")
+except Exception as e:
+    print(f"⚠️ Secret Error: {e}")
+    B2B_URL = None
+    B2C_URL = None
+    SENDER_EMAIL = "lookscorner080@gmail.com"
 
 # --- TIME LIMITS ---
 START_TIME = time.time()
