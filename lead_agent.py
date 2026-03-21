@@ -5,7 +5,8 @@ import re
 import random
 
 # --- CONFIGURATION (From Secrets) ---
-SCRIPT_URL = os.getenv("SCRIPT_URL")
+B2B_URL = os.getenv("B2B_SCRIPT_URL")
+B2C_URL = os.getenv("B2C_SCRIPT_URL")
 SENDER_EMAIL = os.getenv("SENDER_EMAIL") or "lookscorner080@gmail.com"
 
 # --- TIME LIMITS ---
@@ -41,9 +42,11 @@ def extract_leads(text):
     phones = re.findall(r'\+?\d{10,13}', text)
     return list(set(emails)), list(set(phones))
 
-def hunter(query):
-    """Scrapes data and checks duplicates via Google Sheet URL"""
-    print(f"🔎 Searching: {query}")
+def hunter(query, category):
+    # Select the right URL based on category
+    target_url = B2B_URL if category == "B2B" else B2C_URL
+    
+    print(f"🔎 Searching {category}: {query}")
     try:
         search_url = f"https://www.bing.com/search?q={query}"
         headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
@@ -62,15 +65,20 @@ def hunter(query):
                 "title": query[:40]
             }
             
-            # Send to Sheet - Sheet will return "Duplicate" if email exists
+            # Send to the SELECTED Sheet (B2B or B2C)
             try:
-                response = requests.post(SCRIPT_URL, json=payload, timeout=10)
+                response = requests.post(target_url, json=payload, timeout=10)
                 if "Added" in response.text:
-                    print(f"✅ Saved: {email}")
+                    print(f"✅ Saved to {category} Sheet: {email}")
                 elif "Duplicate" in response.text:
-                    print(f"⏭️ Skipped Duplicate: {email}")
+                    print(f"⏭️ Duplicate in {category}: {email}")
             except:
-                print(f"⚠️ Sheet Connection Error")
+                print(f"⚠️ Error connecting to {category} Sheet")
+            
+            time.sleep(2) 
+
+    except Exception as e:
+        print(f"⚠️ Search Error: {e}")
             
             time.sleep(2) # Smooth writing gap
 
