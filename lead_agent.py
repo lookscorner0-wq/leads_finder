@@ -33,7 +33,9 @@ HEADERS = {
 
 JUNK = [
     "example.com", "schema.org", "google.com", "microsoft.com",
-    "bing.com", "jquery.com", "cloudflare.com", "amazonaws.com",
+    "xnxx", "porn", "adult", "sex", "xxx", "forum", "noreply",
+    "no-reply", "support", "info", "admin", "testbing.com", "jquery.com",
+    "cloudflare.com", "amazonaws.com",
     "sentry.io", "wix.com", "wordpress.com", "squarespace.com",
     "apple.com", "youtube.com", "facebook.com", "twitter.com",
     "instagram.com", "tiktok.com", "linkedin.com", "w3.org",
@@ -112,7 +114,11 @@ QUERIES = [
 # ============================================================
 def extract_emails(text):
     emails = re.findall(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-z]{2,}', text)
-    return [e for e in set(emails) if not any(j in e for j in JUNK) and len(e) < 60]
+    return [
+        e for e in set(emails)
+        if not any(j in e.lower() for j in JUNK + JUNK_KEYWORDS)
+        and len(e) < 60
+    ]
 
 def clean_phone(phone):
     if not phone or phone == "N/A":
@@ -325,39 +331,40 @@ async def run_agent():
     agent_start = time.time()
 
     async with async_playwright() as p:
-        browser = await p.chromium.launch(
-            headless=True,
-            args=["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"]
-        )
+    browser = await p.chromium.launch(
+        headless=True,
+        args=["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"]
+    )
+    page = await browser.new_page()  # ✅ FIX 1
 
-        while (time.time() - agent_start) < SEVEN_HOURS:
-            cycle += 1
-            elapsed = int((time.time() - agent_start) / 60)
-            print(f"\n{'='*50}")
-            print(f"[CYCLE {cycle}] Elapsed: {elapsed} mins")
+    while (time.time() - agent_start) < SEVEN_HOURS:
+        cycle += 1
+        elapsed = int((time.time() - agent_start) / 60)
+        print(f"\n{'='*50}")
+        print(f"[CYCLE {cycle}] Elapsed: {elapsed} mins")
 
-            query = queries[query_index % len(queries)]
-            query_index += 1
+        query = queries[query_index % len(queries)]
+        query_index += 1
 
-            # Bing Round
-            print(f"[BING] {query}")
-            scrape_bing(query)
+        # Bing Round
+        print(f"[BING] {query}")
+        scrape_bing(query)
 
-            await page.wait_for_timeout(random.randint(2000, 4000))
+        await asyncio.sleep(random.uniform(2, 4))  # ✅ FIX 2 (no page needed)
 
-            # Maps Round
-            maps_query = re.sub(r'"', '', query).replace('contact us', '').replace('email us', '').replace('get in touch', '').replace('contact', '').strip()
-            print(f"[MAPS] {maps_query}")
-            maps_leads = await scrape_google_maps(page, maps_query)
-            for lead in maps_leads:
-                save_lead(lead["email"], lead["phone"],
-                         lead["source"], lead["niche"], lead["location"])
+        # Maps Round
+        maps_query = re.sub(r'"', '', query).replace('contact us', '').replace('email us', '').replace('get in touch', '').replace('contact', '').strip()
+        print(f"[MAPS] {maps_query}")
+        maps_leads = await scrape_google_maps(page, maps_query)
+        for lead in maps_leads:
+            save_lead(lead["email"], lead["phone"],
+                     lead["source"], lead["niche"], lead["location"])
 
-            wait = random.randint(30, 60)
-            print(f"[WAIT] {wait}s")
-            await page.wait_for_timeout(wait * 1000)
+        wait = random.randint(30, 60)
+        print(f"[WAIT] {wait}s")
+        await asyncio.sleep(wait)  # ✅ FIX 3
 
-        await browser.close()
+    await browser.close()
 
     # Verification Phase
     print("\n" + "="*50)
