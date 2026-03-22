@@ -1,15 +1,22 @@
 import os
+import subprocess
+
+# Install everything first
+subprocess.run(["pip", "install", "playwright", "email-validator", "dnspython", "requests", "beautifulsoup4", "-q"], check=True)
+subprocess.run(["playwright", "install", "chromium"], check=True)
+subprocess.run(["playwright", "install-deps", "chromium"], check=True)
+
+# Now import
 import re
 import time
 import random
 import asyncio
 import requests
 import dns.resolver
-import csv
 from bs4 import BeautifulSoup
 from urllib.parse import quote
 from email_validator import validate_email, EmailNotValidError
-from playwright.async_api import async_playwright
+from playwright.async_api import async_playwrightimport os
 
 # ============================================================
 # CONFIGURATION — EDIT THESE
