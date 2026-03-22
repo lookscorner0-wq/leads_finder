@@ -330,7 +330,6 @@ async def run_agent():
             args=["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"]
         )
 
-
         while (time.time() - agent_start) < SEVEN_HOURS:
             cycle += 1
             elapsed = int((time.time() - agent_start) / 60)
@@ -344,6 +343,8 @@ async def run_agent():
             print(f"[BING] {query}")
             scrape_bing(query)
 
+            await page.wait_for_timeout(random.randint(2000, 4000))
+
             # Maps Round
             maps_query = re.sub(r'"', '', query).replace('contact us', '').replace('email us', '').replace('get in touch', '').replace('contact', '').strip()
             print(f"[MAPS] {maps_query}")
@@ -351,7 +352,12 @@ async def run_agent():
             for lead in maps_leads:
                 save_lead(lead["email"], lead["phone"],
                          lead["source"], lead["niche"], lead["location"])
-            print(f"[MAPS] Saved {len(maps_leads)} leads")
+
+            wait = random.randint(30, 60)
+            print(f"[WAIT] {wait}s")
+            await page.wait_for_timeout(wait * 1000)
+
+        await browser.close()
 
     # Verification Phase
     print("\n" + "="*50)
@@ -361,7 +367,6 @@ async def run_agent():
         run_verification()
         time.sleep(300)
 
-    # Sleep then restart
     print("\n[SLEEP] 10 minutes...")
     time.sleep(600)
     print("\n[RESTART]")
