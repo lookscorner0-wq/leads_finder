@@ -324,8 +324,11 @@ async def run_agent():
     agent_start = time.time()
 
     async with async_playwright() as p:
-     browser = await p.chromium.launch(headless=True, args=["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"])
-        page = await browser.new_page()
+     browser = await p.chromium.launch(
+            headless=True,
+            args=["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"]
+        )
+
 
         while (time.time() - agent_start) < SEVEN_HOURS:
             cycle += 1
