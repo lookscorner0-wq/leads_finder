@@ -1,3 +1,4 @@
+import os
 print("Installing Playwright and browsers...")
 os.system('pip install playwright')
 os.system('playwright install chromium')
