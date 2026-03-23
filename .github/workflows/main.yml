@@ -5,6 +5,11 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# KEY FIX — only ONE workflow runs at a time
+concurrency:
+  group: leads-hunter
+  cancel-in-progress: true
+
 jobs:
   run-kaggle:
     runs-on: ubuntu-latest
@@ -32,21 +37,17 @@ jobs:
           }' > ~/.kaggle/kaggle.json
           chmod 600 ~/.kaggle/kaggle.json
 
-      - name: Stop old session if running
+      - name: Stop old Kaggle session if running
         run: |
-          echo "Checking kernel status..."
-          STATUS=$(kaggle kernels status ${{ secrets.KAGGLE_USERNAME }}/leads-hunter 2>&1 || echo "not_found")
+          KERNEL="${{ secrets.KAGGLE_USERNAME }}/leads-hunter"
+          STATUS=$(kaggle kernels status $KERNEL 2>&1 || echo "not_found")
           echo "Status: $STATUS"
-          if echo "$STATUS" | grep -q "running"; then
-            echo "Running — stopping..."
-            kaggle kernels cancel ${{ secrets.KAGGLE_USERNAME }}/leads-hunter
+          if echo "$STATUS" | grep -qE "running|queued"; then
+            echo "Stopping old session..."
+            kaggle kernels cancel $KERNEL || true
             sleep 60
-          elif echo "$STATUS" | grep -q "queued"; then
-            echo "Queued — cancelling..."
-            kaggle kernels cancel ${{ secrets.KAGGLE_USERNAME }}/leads-hunter
-            sleep 30
           else
-            echo "No active session — pushing directly."
+            echo "No active session."
           fi
 
       - name: Prepare and push kernel
@@ -54,13 +55,10 @@ jobs:
           mkdir -p kaggle_push
           cp lead_agent.py kaggle_push/
           cp kernel-metadata.json kaggle_push/
-          echo "Files ready:"
-          ls -la kaggle_push/
-          echo "Pushing..."
           kaggle kernels push -p kaggle_push/
-          echo "Done."
+          echo "Pushed successfully."
 
-      - name: Confirm kernel started
+      - name: Confirm started
         run: |
           sleep 30
           kaggle kernels status ${{ secrets.KAGGLE_USERNAME }}/leads-hunter
