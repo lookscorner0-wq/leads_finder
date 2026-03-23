@@ -3,30 +3,26 @@ name: Leads Hunter — Auto Run
 on:
   push:
     branches: [main]
-  workflow_dispatch:  # Manual trigger button on GitHub
+  workflow_dispatch:
 
 jobs:
-  run-Kaggle:
+  run-kaggle:
     runs-on: ubuntu-latest
-    timeout-minutes: 600  # 10 hours workflow timeout
+    timeout-minutes: 600
 
     steps:
 
-      # ── Step 1: Checkout repo ────────────────────────────
       - name: Checkout
         uses: actions/checkout@v3
 
-      # ── Step 2: Python setup ─────────────────────────────
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.10"
 
-      # ── Step 3: Install Kaggle CLI ────────────────────────
       - name: Install Kaggle CLI
         run: pip install kaggle
 
-      # ── Step 4: Setup Kaggle credentials ─────────────────
       - name: Setup Kaggle credentials
         run: |
           mkdir -p ~/.kaggle
@@ -36,38 +32,35 @@ jobs:
           }' > ~/.kaggle/kaggle.json
           chmod 600 ~/.kaggle/kaggle.json
 
-      # ── Step 5: Check if old session running → stop it ───
       - name: Stop old session if running
         run: |
           echo "Checking kernel status..."
           STATUS=$(kaggle kernels status ${{ secrets.KAGGLE_USERNAME }}/leads-hunter 2>&1 || echo "not_found")
-          echo "Status output: $STATUS"
-
+          echo "Status: $STATUS"
           if echo "$STATUS" | grep -q "running"; then
-            echo "Old session is RUNNING — stopping it..."
+            echo "Running — stopping..."
             kaggle kernels cancel ${{ secrets.KAGGLE_USERNAME }}/leads-hunter
-            echo "Waiting 60s for kernel to fully stop..."
             sleep 60
-            echo "Old session stopped."
           elif echo "$STATUS" | grep -q "queued"; then
-            echo "Old session is QUEUED — cancelling..."
+            echo "Queued — cancelling..."
             kaggle kernels cancel ${{ secrets.KAGGLE_USERNAME }}/leads-hunter
             sleep 30
-            echo "Queued session cancelled."
           else
-            echo "No active session found — proceeding to push directly."
+            echo "No active session — pushing directly."
           fi
 
-      # ── Step 6: Push new kernel ───────────────────────────
-      - name: Push new kernel to Kaggle
+      - name: Prepare and push kernel
         run: |
-          echo "Pushing new kernel..."
-          kaggle kernels push -p ./kaggle/
-          echo "Kernel pushed successfully."
+          mkdir -p kaggle_push
+          cp lead_agent.py kaggle_push/
+          cp kernel-metadata.json kaggle_push/
+          echo "Files ready:"
+          ls -la kaggle_push/
+          echo "Pushing..."
+          kaggle kernels push -p kaggle_push/
+          echo "Done."
 
-      # ── Step 7: Wait and confirm running ─────────────────
       - name: Confirm kernel started
         run: |
-          echo "Waiting 30s for kernel to start..."
           sleep 30
           kaggle kernels status ${{ secrets.KAGGLE_USERNAME }}/leads-hunter
