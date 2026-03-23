@@ -50,91 +50,86 @@ DISPOSABLE_DOMAINS = {
 JUNK_DOMAINS = [
     "example.com", "schema.org", "google.com", "microsoft.com",
     "bing.com", "jquery.com", "cloudflare.com", "amazonaws.com",
-    "sentry.io", "wix.com", "wordpress.com", "squarespace.com",
+    "sentry.io", "wix.com", "wordpress.org", "squarespace.com",
     "apple.com", "youtube.com", "facebook.com", "twitter.com",
     "instagram.com", "tiktok.com", "linkedin.com", "w3.org",
     "gstatic.com", "googleapis.com", "xnxx.com", "pornhub.com",
-    "fedex.com", "ups.com", "usps.com", "dhl.com"
+    "fedex.com", "ups.com", "usps.com", "dhl.com", "sentry.io"
 ]
 
 JUNK_PREFIXES = [
     "noreply", "no-reply", "test", "abuse", "postmaster",
     "webmaster", "mailer", "donotreply", "do-not-reply",
-    "newsletter", "unsubscribe", "bounce", "daemon"
+    "newsletter", "unsubscribe", "bounce", "daemon", "security"
 ]
 
 # ============================================================
-# B2B QUERIES — No law/cybersecurity
+# B2B QUERIES
 # ============================================================
 B2B_QUERIES = [
     '"real estate agency" owner founder email',
-    '"marketing agency" owner founder email site:clutch.co',
-    '"ecommerce store" owner founder email site:manta.com',
-    '"restaurant owner" email contact site:yelp.com',
+    '"marketing agency" owner founder email',
+    '"ecommerce store" owner founder email',
+    '"restaurant owner" email contact',
     '"digital marketing agency" CEO founder email',
-    '"web design agency" owner email site:clutch.co',
+    '"web design agency" owner email',
     '"social media agency" founder email contact',
     '"SEO agency" CEO founder email',
-    '"software company" founder CEO email site:crunchbase.com',
-    '"IT services company" owner email site:yellowpages.com',
-    '"accounting firm" owner email site:manta.com',
+    '"software company" founder CEO email',
+    '"IT services company" owner email',
+    '"accounting firm" owner email',
     '"dental clinic" owner email contact',
     '"gym fitness center" owner email',
     '"photography studio" owner email contact',
     '"catering company" owner email contact',
     '"event management company" founder email',
     '"logistics company" CEO owner email',
-    '"construction company" owner email site:manta.com',
+    '"construction company" owner email',
     '"architecture firm" partner email contact',
     '"interior design studio" owner email',
-    '"printing company" owner email site:yellowpages.com',
     '"recruitment agency" founder email',
-    '"HR consulting firm" CEO email contact',
+    '"HR consulting firm" CEO email',
     '"management consulting" partner email',
-    '"fintech startup" founder CEO email site:crunchbase.com',
-    '"SaaS startup" founder email site:crunchbase.com',
+    '"fintech startup" founder CEO email',
+    '"SaaS startup" founder email',
     '"cloud services company" founder email',
     '"app development company" CEO founder email',
-    '"video production company" owner email contact',
+    '"video production company" owner email',
     '"health clinic" owner email contact',
     '"beauty salon" owner email contact',
     '"spa wellness center" owner email',
     '"travel agency" owner email contact',
-    '"food distribution company" owner email',
-    '"wholesale business" owner email contact',
+    '"wholesale business" owner email',
     '"e-learning company" founder CEO email',
 ]
 
 # ============================================================
-# B2C QUERIES — Online stores focus
+# B2C QUERIES
 # ============================================================
 B2C_QUERIES = [
     '"online clothing store" contact email owner',
-    '"fashion boutique" online store email contact',
+    '"fashion boutique" online store email',
     '"streetwear brand" owner email contact',
     '"activewear brand" founder email',
     '"vintage clothing" online store email',
     '"home decor online store" owner email',
-    '"kitchen products store" contact email',
     '"beauty products online" owner email',
-    '"skincare brand" founder email contact',
-    '"hair products online store" email contact',
+    '"skincare brand" founder email',
     '"fitness equipment store" owner email',
-    '"jewelry online store" owner founder email',
+    '"jewelry online store" owner email',
     '"handmade products store" email contact',
     '"pet supplies online" owner email',
     '"supplement store online" founder email',
     '"baby products store" founder email',
-    '"electronics accessories store" email owner',
-    '"sports gear online" contact email owner',
+    '"sports gear online" contact email',
 ]
 
 MAPS_QUERIES = [
     "real estate agency", "marketing agency", "web design company",
-    "accounting firm", "dental clinic", "gym fitness",
-    "restaurant", "clothing store", "photography studio",
+    "accounting firm", "dental clinic", "gym fitness center",
+    "restaurant", "clothing boutique", "photography studio",
     "beauty salon", "spa wellness", "catering company",
-    "event management", "interior design", "travel agency",
+    "event management", "interior design studio", "travel agency",
     "digital marketing agency", "health clinic", "printing company"
 ]
 
@@ -144,45 +139,17 @@ LOCATIONS = [
     "San Francisco", "Boston", "Seattle", "Atlanta", "Phoenix"
 ]
 
-# ============================================================
-# PROXY POOL
-# ============================================================
-PROXY_POOL  = []
-PROXY_INDEX = 0
-
-def get_free_proxies():
-    proxies = []
-    try:
-        res = requests.get(
-            "https://proxylist.geonode.com/api/proxy-list?limit=50&page=1"
-            "&sort_by=lastChecked&sort_type=desc&protocols=http",
-            timeout=10
-        )
-        for item in res.json().get("data", []):
-            ip, port = item.get("ip"), item.get("port")
-            if ip and port:
-                proxies.append(f"http://{ip}:{port}")
-    except Exception as e:
-        print(f"[PROXY] Fetch failed: {e}")
-    print(f"[PROXY] Loaded {len(proxies)} proxies")
-    return proxies
-
-def get_next_proxy():
-    global PROXY_INDEX
-    if not PROXY_POOL:
-        return None
-    proxy = PROXY_POOL[PROXY_INDEX % len(PROXY_POOL)]
-    PROXY_INDEX += 1
-    return {"http": proxy, "https": proxy}
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                  "AppleWebKit/537.36 (KHTML, like Gecko) "
+                  "Chrome/120.0.0.0 Safari/537.36",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+}
 
 # ============================================================
 # EMAIL UTILITIES
 # ============================================================
-HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                  "AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36"
-}
-
 def extract_emails(text):
     raw     = re.findall(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-z]{2,}', text)
     cleaned = []
@@ -240,25 +207,19 @@ def reacher_verify(email):
         email = valid.email.lower()
     except EmailNotValidError:
         return "INVALID", "bad_format"
-
     domain = email.split("@")[1]
-
     if domain in DISPOSABLE_DOMAINS:
         return "INVALID", "disposable"
-
     if domain in BIG_PROVIDERS:
         return "RISKY", "big_provider"
-
     mx = get_mx(domain)
     if not mx:
         return "INVALID", "no_mx"
-
     try:
         if is_catch_all(domain, mx):
             return "RISKY", "catch_all"
     except Exception:
         pass
-
     code = smtp_check(email, mx)
     if code == 250:
         return "VALID", "smtp_confirmed"
@@ -275,9 +236,20 @@ def reacher_verify(email):
 # SAVE LEAD
 # ============================================================
 SAVED_EMAILS = set()
+DOMAIN_COUNT = {}
+
+def clean_phone(p):
+    if not p or p == "N/A":
+        return "N/A"
+    p = str(p)
+    match = re.search(r'[\+\d][\d\s\-\(\)\.]{6,}', p)
+    if match:
+        cleaned = match.group(0).strip()
+        return cleaned if len(re.sub(r'\D', '', cleaned)) >= 7 else "N/A"
+    return "N/A"
 
 def save_lead(email, phone, source, niche, lead_type):
-    global SAVED_EMAILS
+    global SAVED_EMAILS, DOMAIN_COUNT
     email = email.lower().strip()
     if email in SAVED_EMAILS:
         return False
@@ -288,13 +260,17 @@ def save_lead(email, phone, source, niche, lead_type):
     domain = email.split("@")[1]
     if domain in DISPOSABLE_DOMAINS:
         return False
+    # Max 3 emails per domain
+    if DOMAIN_COUNT.get(domain, 0) >= 3:
+        return False
+    DOMAIN_COUNT[domain] = DOMAIN_COUNT.get(domain, 0) + 1
     SAVED_EMAILS.add(email)
 
-    phone_str = ("'" + str(phone)) if phone and phone != "N/A" else "N/A"
+    phone_clean = clean_phone(phone)
 
     with open(CSV_FILE, "a", newline="", encoding="utf-8") as f:
         csv.writer(f).writerow([
-            email, phone_str, source, niche,
+            email, phone_clean, source, niche,
             lead_type, "Pending", time.strftime("%Y-%m-%d %H:%M")
         ])
 
@@ -302,7 +278,7 @@ def save_lead(email, phone, source, niche, lead_type):
         try:
             requests.post(B2B_URL, json={
                 "action": "add", "email": email,
-                "phone": phone_str, "source": source[:100],
+                "phone": phone_clean, "source": source[:100],
                 "business_type": niche, "lead_type": lead_type,
                 "location": "Global"
             }, timeout=10)
@@ -337,7 +313,7 @@ def update_sheet_status(email, status):
             pass
 
 # ============================================================
-# SCRAPERS
+# SCRAPE SINGLE SITE
 # ============================================================
 def scrape_site(site_url, niche, lead_type):
     saved = 0
@@ -345,7 +321,7 @@ def scrape_site(site_url, niche, lead_type):
         try:
             r = requests.get(
                 site_url.rstrip("/") + suffix,
-                headers=HEADERS, timeout=8, proxies=get_next_proxy()
+                headers=HEADERS, timeout=10
             )
             if r.status_code != 200:
                 continue
@@ -359,29 +335,10 @@ def scrape_site(site_url, niche, lead_type):
             continue
     return saved
 
-def scrape_bing(query, lead_type="B2B"):
-    saved = 0
-    try:
-        res  = requests.get(
-            f"https://www.bing.com/search?q={quote(query)}&count=10",
-            headers=HEADERS, proxies=get_next_proxy(), timeout=15
-        )
-        soup = BeautifulSoup(res.text, "html.parser")
-        urls = list({
-            a.get("href", "") for a in soup.select("li.b_algo h2 a")
-            if a.get("href", "").startswith("http")
-            and not any(j in a.get("href", "") for j in JUNK_DOMAINS)
-        })[:8]
-        niche = query.split('"')[1] if '"' in query else query.split()[0]
-        print(f"    [BING] {len(urls)} URLs")
-        for u in urls:
-            saved += scrape_site(u, niche, lead_type)
-            time.sleep(random.uniform(1.5, 3))
-    except Exception as e:
-        print(f"    [BING ERROR] {e}")
-    return saved
-
-def scrape_duckduckgo(query, lead_type="B2B"):
+# ============================================================
+# DUCKDUCKGO SCRAPER — No proxy needed
+# ============================================================
+def scrape_ddg(query, lead_type="B2B"):
     saved = 0
     try:
         res  = requests.get(
@@ -389,11 +346,12 @@ def scrape_duckduckgo(query, lead_type="B2B"):
             headers=HEADERS, timeout=15
         )
         soup = BeautifulSoup(res.text, "html.parser")
-        urls = list({
-            a.get("href", "") for a in soup.select("a.result__url")
-            if a.get("href", "").startswith("http")
-            and not any(j in a.get("href", "") for j in JUNK_DOMAINS)
-        })[:8]
+        urls = []
+        for a in soup.select("a.result__a"):
+            href = a.get("href", "")
+            if href.startswith("http") and not any(j in href for j in JUNK_DOMAINS):
+                urls.append(href)
+        urls  = list(set(urls))[:8]
         niche = query.split('"')[1] if '"' in query else query.split()[0]
         print(f"    [DDG] {len(urls)} URLs")
         for u in urls:
@@ -403,6 +361,9 @@ def scrape_duckduckgo(query, lead_type="B2B"):
         print(f"    [DDG ERROR] {e}")
     return saved
 
+# ============================================================
+# YELLOW PAGES SCRAPER — No proxy
+# ============================================================
 def scrape_yellowpages(query, location):
     saved = 0
     try:
@@ -411,27 +372,29 @@ def scrape_yellowpages(query, location):
             f"?search_terms={quote(query)}&geo_location_terms={quote(location)}",
             headers=HEADERS, timeout=15
         )
-        soup = BeautifulSoup(res.text, "html.parser")
+        soup     = BeautifulSoup(res.text, "html.parser")
         listings = soup.select("div.info")
         print(f"    [YP] {len(listings)} listings")
         for listing in listings[:8]:
             try:
-                w = listing.select_one("a.track-visit-website")
+                w  = listing.select_one("a.track-visit-website")
+                ph = listing.select_one("div.phones")
+                phone = ph.text.strip() if ph else "N/A"
                 if w:
-                    saved += scrape_site(w.get("href", ""), query, "B2B")
+                    href = w.get("href", "")
+                    if href.startswith("http"):
+                        saved += scrape_site(href, query, "B2B")
             except Exception:
                 continue
-            time.sleep(random.uniform(1, 2.5))
+            time.sleep(random.uniform(1, 2))
     except Exception as e:
         print(f"    [YP ERROR] {e}")
     return saved
 
+# ============================================================
+# YELP SCRAPER — Business + Reviewer emails
+# ============================================================
 def scrape_yelp(query, location):
-    """
-    Scrapes Yelp in 2 ways:
-    1. Business website → extract contact emails (B2B)
-    2. Reviewer profiles → extract reviewer emails (B2C)
-    """
     saved = 0
     try:
         res  = requests.get(
@@ -445,72 +408,67 @@ def scrape_yelp(query, location):
             if a.get("href", "").startswith("/biz/")
         })[:8]
         print(f"    [YELP] {len(links)} listings")
-
         for biz in links:
             try:
-                r = requests.get(biz, headers=HEADERS, timeout=10)
-                s = BeautifulSoup(r.text, "html.parser")
-
-                # ── B2B: Business website email ──────────────
+                r  = requests.get(biz, headers=HEADERS, timeout=10)
+                s  = BeautifulSoup(r.text, "html.parser")
+                # B2B — business website
                 wel = s.select_one("a[href*='biz_redir']")
                 if wel:
                     saved += scrape_site(wel.get("href", ""), query, "B2B")
-
-                # ── B2C: Reviewer profile emails ─────────────
+                # B2C — reviewer profiles
                 reviewer_links = list({
                     "https://www.yelp.com" + a.get("href", "").split("?")[0]
                     for a in s.select("a[href*='/user_details']")
-                    if a.get("href", "").startswith("/user_details")
                 })[:5]
-
-                for reviewer_url in reviewer_links:
+                for rv in reviewer_links:
                     try:
-                        rr   = requests.get(reviewer_url, headers=HEADERS, timeout=8)
-                        rs   = BeautifulSoup(rr.text, "html.parser")
-                        text = rs.get_text()
-                        emails = extract_emails(text)
+                        rr     = requests.get(rv, headers=HEADERS, timeout=8)
+                        emails = extract_emails(BeautifulSoup(rr.text, "html.parser").get_text())
                         for email in emails:
-                            if save_lead(email, "N/A", reviewer_url, query, "B2C"):
-                                saved += 1
-                        # Also check reviewer website if listed
-                        web_el = rs.select_one("a[href*='http'][class*='website']")
-                        if not web_el:
-                            web_el = rs.select_one("p.external-website a")
-                        if web_el:
-                            saved += scrape_site(web_el.get("href", ""), query, "B2C")
+                            save_lead(email, "N/A", rv, query, "B2C")
+                            saved += 1
                     except Exception:
                         continue
-                    time.sleep(random.uniform(1, 1.5))
-
+                    time.sleep(random.uniform(0.5, 1))
             except Exception:
                 continue
             time.sleep(random.uniform(1, 2))
-
     except Exception as e:
         print(f"    [YELP ERROR] {e}")
     return saved
 
-def scrape_manta(query):
+# ============================================================
+# PLAYWRIGHT — Google Search (headless)
+# ============================================================
+async def scrape_google(page, query, lead_type="B2B"):
     saved = 0
     try:
-        res  = requests.get(
-            f"https://www.manta.com/search?search={quote(query)}",
-            headers=HEADERS, timeout=15
+        search_url = f"https://www.google.com/search?q={quote(query)}&num=10"
+        await page.goto(search_url, wait_until="domcontentloaded", timeout=15000)
+        await page.wait_for_timeout(random.randint(2000, 3000))
+
+        # Extract result links
+        links = await page.eval_on_selector_all(
+            "a[href]",
+            "els => els.map(e => e.href).filter(h => h.startsWith('http') && !h.includes('google'))"
         )
-        soup  = BeautifulSoup(res.text, "html.parser")
-        links = list({
-            a.get("href", "") for a in soup.select("a[href*='/c/']")
-            if a.get("href", "").startswith("https://www.manta.com/c/")
-        })[:8]
+        # Filter junk
+        urls = [u for u in links if not any(j in u for j in JUNK_DOMAINS)][:8]
         niche = query.split('"')[1] if '"' in query else query.split()[0]
-        print(f"    [MANTA] {len(links)} listings")
-        for biz in links:
-            saved += scrape_site(biz, niche, "B2B")
-            time.sleep(random.uniform(1, 2))
+        print(f"    [GOOGLE] {len(urls)} URLs")
+
+        for u in urls:
+            saved += scrape_site(u, niche, lead_type)
+            await asyncio.sleep(random.uniform(1, 2))
+
     except Exception as e:
-        print(f"    [MANTA ERROR] {e}")
+        print(f"    [GOOGLE ERROR] {e}")
     return saved
 
+# ============================================================
+# PLAYWRIGHT — Google Maps (fixed selectors)
+# ============================================================
 async def get_emails_playwright(page, url):
     for suffix in ["", "/contact", "/contact-us", "/about", "/about-us", "/team"]:
         try:
@@ -530,38 +488,68 @@ async def scrape_maps(page, query, lead_type="B2B"):
     try:
         await page.goto(maps_url, wait_until="domcontentloaded", timeout=15000)
         await page.wait_for_timeout(4000)
-        listings = await page.query_selector_all("div.Nv2PK")
-        niche    = query.split()[0]
-        print(f"    [MAPS] {len(listings)} listings")
-        for i in range(min(len(listings), 8)):
+
+        # Try multiple selectors — Google changes these
+        listings = []
+        for selector in ["div.Nv2PK", "div[role='article']", "a[href*='/maps/place/']"]:
+            listings = await page.query_selector_all(selector)
+            if listings:
+                print(f"    [MAPS] {len(listings)} listings via {selector}")
+                break
+
+        if not listings:
+            print("    [MAPS] No listings found")
+            return 0
+
+        niche = query.split()[0]
+
+        for i in range(min(len(listings), 6)):
             if saved >= MAX_PER_CYCLE:
                 break
             try:
                 await page.goto(maps_url, wait_until="domcontentloaded", timeout=15000)
                 await page.wait_for_timeout(3000)
-                listings = await page.query_selector_all("div.Nv2PK")
+                listings = []
+                for selector in ["div.Nv2PK", "div[role='article']", "a[href*='/maps/place/']"]:
+                    listings = await page.query_selector_all(selector)
+                    if listings:
+                        break
                 if i >= len(listings):
                     break
+
                 await listings[i].click()
                 await page.wait_for_timeout(2500)
+
+                # Phone
                 phone    = "N/A"
-                phone_el = await page.query_selector("button[data-item-id*='phone']")
-                if phone_el:
-                    aria = await phone_el.get_attribute("aria-label")
-                    if aria:
-                        phone = re.sub(r'[^\d+\s\-()]', '', aria).strip()
-                web_el = await page.query_selector("a[data-item-id='authority']")
-                if web_el:
-                    website = await web_el.get_attribute("href")
-                    if website:
-                        emails = await get_emails_playwright(page, website)
-                        for email in emails:
-                            if save_lead(email, phone, website, niche, lead_type):
-                                saved += 1
+                for ph_sel in ["button[data-item-id*='phone']", "button[aria-label*='phone']",
+                               "span[aria-label*='phone']"]:
+                    phone_el = await page.query_selector(ph_sel)
+                    if phone_el:
+                        aria = await phone_el.get_attribute("aria-label")
+                        if aria:
+                            phone = clean_phone(aria)
+                        break
+
+                # Website
+                for web_sel in ["a[data-item-id='authority']", "a[aria-label*='website']",
+                                "a[href*='http'][data-tooltip='Open website']"]:
+                    web_el = await page.query_selector(web_sel)
+                    if web_el:
+                        website = await web_el.get_attribute("href")
+                        if website and website.startswith("http"):
+                            emails = await get_emails_playwright(page, website)
+                            for email in emails:
+                                if save_lead(email, phone, website, niche, lead_type):
+                                    saved += 1
+                        break
+
                 await asyncio.sleep(random.uniform(1.5, 3))
+
             except Exception as e:
                 print(f"    [MAPS ERROR] {e}")
                 continue
+
     except Exception as e:
         print(f"    [MAPS FATAL] {e}")
     return saved
@@ -574,8 +562,8 @@ def run_verification_phase():
     print("[PHASE 2] VERIFICATION — 1 hour")
     print("=" * 60)
 
-    verify_start            = time.time()
-    valid_c, invalid_c, unknown_c = 0, 0, 0
+    verify_start              = time.time()
+    valid_c = invalid_c = unk = 0
 
     pending = []
     try:
@@ -607,21 +595,19 @@ def run_verification_phase():
             invalid_c += 1
             print(f"    [INVALID] {email} — {reason}")
         else:
-            unknown_c += 1
+            unk += 1
             print(f"    [{status}] {email} — {reason}")
 
         time.sleep(1.5)
 
-    print(f"\n[VERIFY DONE] Valid:{valid_c} Invalid:{invalid_c} Unknown/Risky:{unknown_c}")
+    print(f"\n[VERIFY DONE] Valid:{valid_c} Invalid:{invalid_c} Unknown/Risky:{unk}")
 
 # ============================================================
 # MAIN AGENT
 # ============================================================
 async def run_agent():
-    global PROXY_POOL
-
     print("=" * 60)
-    print("   LEADS AGENT — Full Cycle Mode")
+    print("   LEADS AGENT — No Proxy | DDG + Google + YP + Yelp + Maps")
     print("   7h Scrape → 1h Verify → 7min Sleep → Repeat @ 8.5h")
     print("=" * 60)
 
@@ -630,8 +616,6 @@ async def run_agent():
             "Email", "Phone", "Source", "Niche",
             "Type", "Status", "Timestamp"
         ])
-
-    PROXY_POOL = get_free_proxies()
 
     b2b_q = B2B_QUERIES.copy()
     b2c_q = B2C_QUERIES.copy()
@@ -649,7 +633,6 @@ async def run_agent():
         print(f"[MASTER CYCLE {master_cycle}]")
         print(f"{'='*60}")
 
-        # ── PHASE 1: SCRAPING ────────────────────────────────
         print(f"\n[PHASE 1] Scraping {SCRAPE_HOURS}h...")
         scrape_start = time.time()
         total_saved  = 0
@@ -658,11 +641,19 @@ async def run_agent():
         async with async_playwright() as p:
             browser = await p.chromium.launch(
                 headless=True,
-                args=["--no-sandbox", "--disable-setuid-sandbox",
-                      "--disable-dev-shm-usage"]
+                args=[
+                    "--no-sandbox",
+                    "--disable-setuid-sandbox",
+                    "--disable-dev-shm-usage",
+                    "--disable-blink-features=AutomationControlled",
+                ]
             )
-            page = await browser.new_page()
-            await page.set_extra_http_headers({"User-Agent": HEADERS["User-Agent"]})
+            context = await browser.new_context(
+                user_agent=HEADERS["User-Agent"],
+                viewport={"width": 1280, "height": 800},
+                locale="en-US",
+            )
+            page = await context.new_page()
 
             while (time.time() - scrape_start) < (SCRAPE_HOURS * 3600):
                 sub_cycle += 1
@@ -677,31 +668,30 @@ async def run_agent():
                 q_b2b     = b2b_query.split('"')[1] if '"' in b2b_query else b2b_query
                 q_b2c     = b2c_query.split('"')[1] if '"' in b2c_query else b2c_query
 
-                print(f"\n[B2B BING]  {b2b_query[:50]}")
-                total_saved += scrape_bing(b2b_query, "B2B")
+                # DDG — B2B
+                print(f"\n[B2B DDG]    {b2b_query[:50]}")
+                total_saved += scrape_ddg(b2b_query, "B2B")
 
-                print(f"\n[B2B DDG]   {b2b_query[:50]}")
-                total_saved += scrape_duckduckgo(b2b_query, "B2B")
+                # Google Headless — B2B
+                print(f"\n[B2B GOOGLE] {b2b_query[:50]}")
+                total_saved += await scrape_google(page, b2b_query + " email contact", "B2B")
 
-                print(f"\n[B2B YP]    {q_b2b[:30]} | {location}")
+                # Yellow Pages — B2B
+                print(f"\n[B2B YP]     {q_b2b[:30]} | {location}")
                 total_saved += scrape_yellowpages(q_b2b, location)
 
-                print(f"\n[B2B MANTA] {q_b2b[:30]}")
-                total_saved += scrape_manta(q_b2b)
+                # DDG — B2C
+                print(f"\n[B2C DDG]    {b2c_query[:50]}")
+                total_saved += scrape_ddg(b2c_query, "B2C")
 
-                print(f"\n[B2C BING]  {b2c_query[:50]}")
-                total_saved += scrape_bing(b2c_query, "B2C")
-
-                print(f"\n[B2C YELP]  {q_b2c[:30]} | {location}")
+                # Yelp — B2C + B2B
+                print(f"\n[YELP]       {q_b2c[:30]} | {location}")
                 total_saved += scrape_yelp(q_b2c, location)
 
+                # Google Maps
                 maps_q = random.choice(MAPS_QUERIES) + " " + location
-                print(f"\n[MAPS]      {maps_q}")
+                print(f"\n[MAPS]       {maps_q}")
                 total_saved += await scrape_maps(page, maps_q, "B2B")
-
-                if sub_cycle % 10 == 0:
-                    print("\n[PROXY] Refreshing...")
-                    PROXY_POOL = get_free_proxies()
 
                 print(f"\n[WAIT] 45s | Total: {total_saved}")
                 await asyncio.sleep(45)
@@ -709,23 +699,20 @@ async def run_agent():
             await browser.close()
 
         grand_total += total_saved
-        print(f"\n[PHASE 1 DONE] This session: {total_saved} | Grand total: {grand_total}")
+        print(f"\n[PHASE 1 DONE] Session: {total_saved} | Grand: {grand_total}")
 
-        # ── PHASE 2: VERIFICATION ────────────────────────────
         run_verification_phase()
 
-        # ── SLEEP ────────────────────────────────────────────
         print(f"\n[SLEEP] {SLEEP_MINUTES} minutes...")
         time.sleep(SLEEP_MINUTES * 60)
 
-        # ── WAIT FOR FULL 8.5h CYCLE ─────────────────────────
         elapsed_total = time.time() - cycle_start
         remaining     = (RESTART_HOURS * 3600) - elapsed_total
         if remaining > 0:
             print(f"[WAIT] {int(remaining/60)}min until next cycle...")
             time.sleep(remaining)
 
-        print(f"\n[RESTART] Cycle {master_cycle} done → Starting cycle {master_cycle+1}")
+        print(f"\n[RESTART] Cycle {master_cycle} done → {master_cycle + 1}")
 
 
 if __name__ == "__main__":
