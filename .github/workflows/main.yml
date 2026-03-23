@@ -6,7 +6,7 @@ on:
   workflow_dispatch:  # Manual trigger button on GitHub
 
 jobs:
-  run-kaggle:
+  run-leads_finder:
     runs-on: ubuntu-latest
     timeout-minutes: 600  # 10 hours workflow timeout
 
